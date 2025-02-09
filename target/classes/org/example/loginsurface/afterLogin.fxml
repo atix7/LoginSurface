@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.loginsurface.AfterLogin">
+   <center>
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: green;"
+                  BorderPane.alignment="CENTER">
+         <ImageView fitHeight="303.0" fitWidth="600.0" layoutX="31.0" layoutY="28.0" pickOnBounds="true"
+                    preserveRatio="true">
+            <Image url="@../../../IMG_20170715_181404_hdr.jpg"/>
+         </ImageView>
+         <Button fx:id="logout" layoutX="482.0" layoutY="345.0" mnemonicParsing="false" onAction="#userLogout"
+                 prefHeight="26.0" prefWidth="87.0" style="-fx-background-color: #DFC46C;" text="Logout"/>
+         <Button fx:id="newUser" layoutX="31.0" layoutY="345.0" mnemonicParsing="false" onAction="#newUserForm"
+                 prefHeight="26.0" prefWidth="87.0" style="-fx-background-color: #DFC46C;" text="New user"/>
+      </AnchorPane>
+   </center>
+</BorderPane>
