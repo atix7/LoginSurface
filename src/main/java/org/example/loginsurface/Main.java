@@ -21,7 +21,6 @@ public class Main extends Application {
         primarystage.setTitle("Login app!");
         primarystage.setScene(scene);
         primarystage.show();
-        System.out.println("dfaa");
     }
     public void changeScene(String fxml) throws IOException {
         Parent pane = FXMLLoader.load(Objects.requireNonNull(getClass().getResource(fxml)));
