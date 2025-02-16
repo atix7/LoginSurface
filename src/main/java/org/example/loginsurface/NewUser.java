@@ -7,6 +7,10 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import javax.swing.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+
 public class NewUser {
     @FXML
     public Button cancelButton;
@@ -62,7 +66,7 @@ public class NewUser {
         String phone = getPhoneField().getText();
         String password = getPasswordField().getText();
         String password2 = getPasswordField2().getText();
-        if (!phone.matches("[\\d/\\()-]+")){
+        if (!phone.matches("[\\d/\\()-]+")) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText(null);
@@ -71,25 +75,34 @@ public class NewUser {
             return;
         }
 
-        if(!password.equals(password2)){
+        if (!password.equals(password2)) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText(null);
             alert.setContentText("Passwords do not match!");
             alert.showAndWait();
             return;
-        }
-        else {
+        } else {
             NewUser newUser = new NewUser(name, mail, phone, password, password2);
             userTable.getItems().add(newUser);
-        }
+            try (Connection conn = DriverManager.getConnection(DatabaseConn.DB_URL, DatabaseConn.USER, DatabaseConn.PASS);
+                 Statement stmt = conn.createStatement()) {
+                String sql = "insert into myuser values( 5, 'Sumit', 'Mittal')";
 
-        // Clear the text fields after saving
-        nameField.clear();
-        mailField.clear();
-        phoneField.clear();
-        passwordField.clear();
-        passwordField2.clear();
+                //String sql = "INSERT INTO myuser(name, mail, phone, password) VALUES ('\" + name + \"', '\" + mail + \"', '\" + phone + \"', '\" + password + \"')\";";
+                stmt.executeUpdate(sql);
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+
+            // Clear the text fields after saving
+            nameField.clear();
+            mailField.clear();
+            phoneField.clear();
+            passwordField.clear();
+            passwordField2.clear();
+        }
     }
     @FXML
     private void cancelButton(ActionEvent event) {
