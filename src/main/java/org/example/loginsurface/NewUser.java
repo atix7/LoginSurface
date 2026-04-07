@@ -9,6 +9,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javax.swing.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
 
 public class NewUser {
@@ -57,6 +58,32 @@ public class NewUser {
         tMail.setCellValueFactory(new PropertyValueFactory<>("mail"));
         tPhone.setCellValueFactory(new PropertyValueFactory<>("phone"));
         tPassword.setCellValueFactory(new PropertyValueFactory<>("password"));
+
+        loadUsersFromDatabase();
+    }
+    private void loadUsersFromDatabase() {
+        String sql = "SELECT name, mail, phone, password FROM myuser";
+
+        try (Connection conn = DriverManager.getConnection(DatabaseConn.DB_URL, DatabaseConn.USER, DatabaseConn.PASS);
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             var rs = pstmt.executeQuery()) {
+
+            userTable.getItems().clear(); // törli a régit
+
+            while (rs.next()) {
+                NewUser user = new NewUser(
+                        rs.getString("name"),
+                        rs.getString("mail"),
+                        rs.getString("phone"),
+                        rs.getString("password"),
+                        "" // password2 nem kell DB-ből
+                );
+                userTable.getItems().add(user);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -85,15 +112,21 @@ public class NewUser {
         } else {
             NewUser newUser = new NewUser(name, mail, phone, password, password2);
             userTable.getItems().add(newUser);
-            try (Connection conn = DriverManager.getConnection(DatabaseConn.DB_URL, DatabaseConn.USER, DatabaseConn.PASS);
-                 Statement stmt = conn.createStatement()) {
-                String sql = "insert into myuser values( 5, 'Sumit', 'Mittal')";
 
-                //String sql = "INSERT INTO myuser(name, mail, phone, password) VALUES ('\" + name + \"', '\" + mail + \"', '\" + phone + \"', '\" + password + \"')\";";
-                stmt.executeUpdate(sql);
+            String sql = "INSERT INTO myuser(name, mail, phone, password) VALUES (?, ?, ?, ?)";
+
+            try (Connection conn = DriverManager.getConnection(DatabaseConn.DB_URL, DatabaseConn.USER, DatabaseConn.PASS);
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setString(1,name);
+                pstmt.setString(2,mail);
+                pstmt.setString(3,phone);
+                pstmt.setString(4,password);
+
+                pstmt.executeUpdate();
+
             } catch (Exception e) {
                 e.printStackTrace();
-
             }
 
             // Clear the text fields after saving
@@ -114,17 +147,6 @@ public class NewUser {
             e.printStackTrace();
         }
     }
-
-
-    /*@FXML
-    void newUserForm(ActionEvent event) {
-        try {
-            Main m = new Main();
-            m.changeScene("newUserForm.fxml");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
 
     public TextField getNameField() {
         return nameField;
