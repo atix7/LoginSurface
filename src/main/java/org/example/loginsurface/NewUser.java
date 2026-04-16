@@ -15,6 +15,10 @@ public class NewUser {
     @FXML
     public Button cancelButton;
     @FXML
+    public Button changeButton;
+    @FXML
+    public Button saveButton;
+    @FXML
     private TextField nameField;
     @FXML
     private TextField mailField;
@@ -39,6 +43,9 @@ public class NewUser {
     private String phone;
     private String password;
     private String password2;
+
+    private boolean editMode = false;
+    private String editOriginalName;
 
     public NewUser() {
     }
@@ -84,6 +91,25 @@ public class NewUser {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void ChangeButton(ActionEvent event) {
+        NewUser selected = userTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Warning");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select a row to change!");
+            alert.showAndWait();
+            return;
+        }
+        editOriginalName = selected.getName();
+        editMode = true;
+        nameField.setText(selected.getName());
+        mailField.setText(selected.getMail());
+        phoneField.setText(selected.getPhone());
+        passwordField.clear();
+        passwordField2.clear();
+    }
 
     @FXML
     private void SaveButton(ActionEvent event) {
@@ -92,7 +118,8 @@ public class NewUser {
         String phone = getPhoneField().getText();
         String password = getPasswordField().getText();
         String password2 = getPasswordField2().getText();
-        if (!phone.matches("[\\d/\\()-]+")) {
+
+        if (!phone.matches("[\\d/()+\\-]+")) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText(null);
@@ -107,35 +134,46 @@ public class NewUser {
             alert.setHeaderText(null);
             alert.setContentText("Passwords do not match!");
             alert.showAndWait();
+            return;
+        }
 
-        } else {
-            NewUser newUser = new NewUser(name, mail, phone, password, password2);
-            userTable.getItems().add(newUser);
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-            String sql = "INSERT INTO myuser(name, mail, phone, password) VALUES (?, ?, ?, ?)";
-
+        if (editMode) {
+            String sql = "UPDATE myuser SET name=?, mail=?, phone=?, password=? WHERE name=?";
             try (Connection conn = DriverManager.getConnection(DatabaseConn.DB_URL, DatabaseConn.USER, DatabaseConn.PASS);
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-                String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, name);
                 pstmt.setString(2, mail);
                 pstmt.setString(3, phone);
                 pstmt.setString(4, hashedPassword);
-
+                pstmt.setString(5, editOriginalName);
                 pstmt.executeUpdate();
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            // Clear the text fields after saving
-            nameField.clear();
-            mailField.clear();
-            phoneField.clear();
-            passwordField.clear();
-            passwordField2.clear();
+            editMode = false;
+            editOriginalName = null;
+        } else {
+            String sql = "INSERT INTO myuser(name, mail, phone, password) VALUES (?, ?, ?, ?)";
+            try (Connection conn = DriverManager.getConnection(DatabaseConn.DB_URL, DatabaseConn.USER, DatabaseConn.PASS);
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, name);
+                pstmt.setString(2, mail);
+                pstmt.setString(3, phone);
+                pstmt.setString(4, hashedPassword);
+                pstmt.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+
+        nameField.clear();
+        mailField.clear();
+        phoneField.clear();
+        passwordField.clear();
+        passwordField2.clear();
+        loadUsersFromDatabase();
     }
     @FXML
     private void cancelButton(ActionEvent event) {
