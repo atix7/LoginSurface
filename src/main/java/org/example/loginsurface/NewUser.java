@@ -6,11 +6,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-import javax.swing.*;
+import org.mindrot.jbcrypt.BCrypt;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 
 public class NewUser {
     @FXML
@@ -108,7 +107,7 @@ public class NewUser {
             alert.setHeaderText(null);
             alert.setContentText("Passwords do not match!");
             alert.showAndWait();
-            return;
+
         } else {
             NewUser newUser = new NewUser(name, mail, phone, password, password2);
             userTable.getItems().add(newUser);
@@ -118,10 +117,11 @@ public class NewUser {
             try (Connection conn = DriverManager.getConnection(DatabaseConn.DB_URL, DatabaseConn.USER, DatabaseConn.PASS);
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-                pstmt.setString(1,name);
-                pstmt.setString(2,mail);
-                pstmt.setString(3,phone);
-                pstmt.setString(4,password);
+                String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+                pstmt.setString(1, name);
+                pstmt.setString(2, mail);
+                pstmt.setString(3, phone);
+                pstmt.setString(4, hashedPassword);
 
                 pstmt.executeUpdate();
 
@@ -142,7 +142,7 @@ public class NewUser {
         try
         {
             Main m = new Main();
-            m.changeScene("afterLogin.fxml");
+            m.changeScene("beforeLogin.fxml");
         } catch (Exception e) {
             e.printStackTrace();
         }

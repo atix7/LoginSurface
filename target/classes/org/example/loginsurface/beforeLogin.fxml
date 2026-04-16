@@ -32,6 +32,7 @@
             <TextField fx:id="username" layoutX="26.0" layoutY="140.0" promptText="Username" />
             <TextField fx:id="password" layoutX="26.0" layoutY="175.0" promptText="Password" />
             <Button fx:id="button" layoutX="51.0" layoutY="232.0" mnemonicParsing="false" onAction="#userLogin" prefHeight="46.0" prefWidth="99.0" style="-fx-background-color: #DFC46C;" text="Login" />
+            <Button layoutX="51.0" layoutY="288.0" mnemonicParsing="false" onAction="#openRegister" prefHeight="26.0" prefWidth="99.0" style="-fx-background-color: #DFC46C;" text="Register" />
             <Label fx:id="wrongLogin" layoutX="25.0" layoutY="109.0" prefHeight="17.0" prefWidth="149.0" textFill="#5fcd0b">
                <font>
                   <Font size="14.0" />
