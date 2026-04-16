@@ -4,7 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.beans.property.SimpleStringProperty;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
@@ -30,10 +30,10 @@ public class NewUserController {
 
     public void initialize() {
         userTable.setItems(FXCollections.observableArrayList());
-        tName.setCellValueFactory(new PropertyValueFactory<>("name"));
-        tMail.setCellValueFactory(new PropertyValueFactory<>("mail"));
-        tPhone.setCellValueFactory(new PropertyValueFactory<>("phone"));
-        tPassword.setCellValueFactory(new PropertyValueFactory<>("password"));
+        tName.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getName()));
+        tMail.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getMail()));
+        tPhone.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getPhone()));
+        tPassword.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getPassword()));
         loadUsersFromDatabase();
     }
 
@@ -55,6 +55,24 @@ public class NewUserController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void DeleteButton(ActionEvent event) {
+        User selected = userTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showError("Please select a row to delete!");
+            return;
+        }
+        String sql = "DELETE FROM myuser WHERE name = ?";
+        try (Connection conn = DriverManager.getConnection(DatabaseConn.DB_URL, DatabaseConn.USER, DatabaseConn.PASS);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, selected.getName());
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        loadUsersFromDatabase();
     }
 
     @FXML

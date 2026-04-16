@@ -5,6 +5,6 @@ module org.example.loginsurface {
     requires java.sql;
     requires jbcrypt;
 
-    opens org.example.loginsurface to javafx.fxml;
+    opens org.example.loginsurface to javafx.fxml, javafx.controls;
     exports org.example.loginsurface;
 }

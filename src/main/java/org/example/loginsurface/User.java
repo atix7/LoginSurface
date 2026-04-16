@@ -17,4 +17,5 @@ public class User {
     public String getName()     { return name; }
     public String getMail()     { return mail; }
     public String getPhone()    { return phone; }
+    public String getPassword() { return password; }
 }
