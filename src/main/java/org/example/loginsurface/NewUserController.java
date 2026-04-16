@@ -5,58 +5,28 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-
 import org.mindrot.jbcrypt.BCrypt;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 
-public class NewUser {
-    @FXML
-    public Button cancelButton;
-    @FXML
-    public Button changeButton;
-    @FXML
-    public Button saveButton;
-    @FXML
-    private TextField nameField;
-    @FXML
-    private TextField mailField;
-    @FXML
-    private TextField phoneField;
-    @FXML
-    private TextField passwordField;
-    @FXML
-    private TextField passwordField2;
-    @FXML
-    private TableView<NewUser> userTable;
-    @FXML
-    private TableColumn<NewUser, String> tName;
-    @FXML
-    private TableColumn<NewUser, String> tMail;
-    @FXML
-    private TableColumn<NewUser, String> tPhone;
-    @FXML
-    private TableColumn<NewUser, String> tPassword;
-    private String name;
-    private String mail;
-    private String phone;
-    private String password;
-    private String password2;
+public class NewUserController {
+
+    @FXML private TextField nameField;
+    @FXML private TextField mailField;
+    @FXML private TextField phoneField;
+    @FXML private TextField passwordField;
+    @FXML private TextField passwordField2;
+
+    @FXML private TableView<User> userTable;
+    @FXML private TableColumn<User, String> tName;
+    @FXML private TableColumn<User, String> tMail;
+    @FXML private TableColumn<User, String> tPhone;
+    @FXML private TableColumn<User, String> tPassword;
 
     private boolean editMode = false;
     private String editOriginalName;
-
-    public NewUser() {
-    }
-
-    public NewUser(String name, String mail, String phone, String password, String password2) {
-        this.name = name;
-        this.mail = mail;
-        this.phone = phone;
-        this.password = password;
-        this.password2 = password2;
-    }
 
     public void initialize() {
         userTable.setItems(FXCollections.observableArrayList());
@@ -64,36 +34,32 @@ public class NewUser {
         tMail.setCellValueFactory(new PropertyValueFactory<>("mail"));
         tPhone.setCellValueFactory(new PropertyValueFactory<>("phone"));
         tPassword.setCellValueFactory(new PropertyValueFactory<>("password"));
-
         loadUsersFromDatabase();
     }
+
     private void loadUsersFromDatabase() {
         String sql = "SELECT name, mail, phone, password FROM myuser";
-
         try (Connection conn = DriverManager.getConnection(DatabaseConn.DB_URL, DatabaseConn.USER, DatabaseConn.PASS);
              PreparedStatement pstmt = conn.prepareStatement(sql);
              var rs = pstmt.executeQuery()) {
 
-            userTable.getItems().clear(); // törli a régit
-
+            userTable.getItems().clear();
             while (rs.next()) {
-                NewUser user = new NewUser(
+                userTable.getItems().add(new User(
                         rs.getString("name"),
                         rs.getString("mail"),
                         rs.getString("phone"),
-                        rs.getString("password"),
-                        "" // password2 nem kell DB-ből
-                );
-                userTable.getItems().add(user);
+                        rs.getString("password")
+                ));
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     @FXML
     private void ChangeButton(ActionEvent event) {
-        NewUser selected = userTable.getSelectionModel().getSelectedItem();
+        User selected = userTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Warning");
@@ -113,27 +79,18 @@ public class NewUser {
 
     @FXML
     private void SaveButton(ActionEvent event) {
-        String name = getNameField().getText();
-        String mail = getMailField().getText();
-        String phone = getPhoneField().getText();
-        String password = getPasswordField().getText();
-        String password2 = getPasswordField2().getText();
+        String name = nameField.getText();
+        String mail = mailField.getText();
+        String phone = phoneField.getText();
+        String password = passwordField.getText();
+        String password2 = passwordField2.getText();
 
         if (!phone.matches("[\\d/()+\\-]+")) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText("Phone number is not valid!");
-            alert.showAndWait();
+            showError("Phone number is not valid!");
             return;
         }
-
         if (!password.equals(password2)) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText("Passwords do not match!");
-            alert.showAndWait();
+            showError("Passwords do not match!");
             return;
         }
 
@@ -175,54 +132,21 @@ public class NewUser {
         passwordField2.clear();
         loadUsersFromDatabase();
     }
+
     @FXML
     private void cancelButton(ActionEvent event) {
-        try
-        {
-            Main m = new Main();
-            m.changeScene("beforeLogin.fxml");
+        try {
+            new Main().changeScene("beforeLogin.fxml");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public TextField getNameField() {
-        return nameField;
-    }
-
-    public TextField getMailField() {
-        return mailField;
-    }
-
-    public TextField getPhoneField() {
-        return phoneField;
-    }
-
-    public TextField getPasswordField() {
-        return passwordField;
-    }
-
-    public TextField getPasswordField2() {
-        return passwordField2;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getMail() {
-        return mail;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getPassword2() {
-        return password2;
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
