@@ -30,7 +30,7 @@ public class Login {
     @FXML
     void openRegister(ActionEvent event) {
         try {
-            new Main().changeScene("newUserForm.fxml");
+            new Main().changeScene("register.fxml");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -56,7 +56,6 @@ public class Login {
                 if (rs.next()) {
                     String storedHash = rs.getString("password");
                     if (BCrypt.checkpw(inputPass, storedHash)) {
-                        wrongLogin.setText("Success!");
                         Main m = new Main();
                         m.changeScene("afterLogin.fxml");
                         return;
@@ -68,6 +67,7 @@ public class Login {
             e.printStackTrace();
         }
 
+        wrongLogin.setTextFill(javafx.scene.paint.Color.web("#e74c3c"));
         wrongLogin.setText("Access denied!");
     }
 }
